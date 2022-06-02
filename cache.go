@@ -48,7 +48,7 @@ func (cache Cache) PutTill(key, value string, deadline time.Time) {
 func (cache Cache) CheckTimer() {
 	for key := range cache.storage {
 		if timeString, ok := cache.timer[key]; ok {
-			dueDate, error := time.Parse("dd-mm-yyyy HH:mm:ss", timeString)
+			dueDate, error := time.Parse(time.RFC3339, timeString)
 			if error != nil {
 				fmt.Println(error)
 				return
