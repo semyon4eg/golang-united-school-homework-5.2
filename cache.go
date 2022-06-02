@@ -2,17 +2,17 @@ package cache
 
 import (
 	"time"
-	"fmt"
 )
 
 type Cache struct {
-	storage, timer map[string]string
+	storage map[string]string
+	timer map[string]time.Time
 }
 
 func NewCache() Cache {
 	return Cache{
 		storage: make(map[string]string),
-		timer: make(map[string]string),
+		timer: make(map[string]time.Time),
 	}
 }
 
@@ -42,19 +42,14 @@ func (cache Cache) Keys() []string {
 
 func (cache Cache) PutTill(key, value string, deadline time.Time) {
 	cache.storage[key] = value
-	cache.timer[key] = deadline.String()
+	cache.timer[key] = deadline
 }
 
 func (cache Cache) CheckTimer() {
 	for key := range cache.storage {
-		if timeString, ok := cache.timer[key]; ok {
-			dueDate, error := time.Parse(time.RFC3339, timeString)
-			if error != nil {
-				fmt.Println(error)
-				return
-			}
+		if deadline, ok := cache.timer[key]; ok {
 
-			if dueDate.Before(time.Now()) {
+			if deadline.Before(time.Now()) {
 				delete(cache.storage, key)
 				delete(cache.timer, key)
 			}
